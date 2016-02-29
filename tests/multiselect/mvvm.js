@@ -982,4 +982,39 @@
 
         multiselect.open();
     });
+    
+    asyncTest("value binding virtualized widget with initially empty array", 1, function() {
+        var container_height = 200;
+        
+        dom = $('<select data-bind="value:value" />').appendTo(QUnit.fixture);
+
+        var multiselect = new kendo.ui.MultiSelect(dom, {
+            close: function(e) { e.preventDefault(); },
+            height: container_height,
+            animation: false,
+            dataTextField: "text",
+            dataValueField: "value",
+            dataSource: createAsyncDataSource(),
+            virtual: {
+                valueMapper: function(o) { o.success(o.value); },
+                itemHeight: 40
+            }
+        });
+
+        var viewModel = kendo.observable({
+            value: []
+        });
+
+        kendo.bind(dom, viewModel);
+
+        multiselect.one("dataBound", function() {
+            start();
+            var item = $(multiselect.items()[1]);
+            item.click();
+            
+            equal(viewModel.value[0], multiselect.dataSource.at(1));
+        });
+
+        multiselect.open();
+    });
 })();
